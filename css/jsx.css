@@ -1,0 +1,46 @@
+html {
+	font-size: 10px;
+}
+
+body {
+	background-color: #000;
+	font-family: "Myriad Pro";
+	font-size: 1.4em;
+}
+
+#svgcanvas {
+	background-color: #000;
+	width: 0px;
+	height: 0px;
+	margin: 0 auto;
+}
+
+#debugWrapper {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 200px;
+	height: 100%;
+	background: #333;
+	color: #ccc;
+	padding: 1em;
+}
+
+#menu {
+  position: absolute;
+  width: 12em;
+}
+
+#menu a {
+  background-color: #333;
+  border-radius: .25em;
+  border: 2px solid #666;
+  color: #ccc;
+  display: block;
+  font-weight: bold;
+  letter-spacing: .1em;
+  margin: .5em;
+  padding: .6em .5em .3em .5em;
+  text-align: center;
+  text-decoration: none;
+}
