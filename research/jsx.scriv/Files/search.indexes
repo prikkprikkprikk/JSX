@@ -2,10 +2,23 @@
 <SearchIndexes Version="1.0">
     <Documents>
         <Document ID="17">
-            <Title>Design</Title>
+            <Title>Doc format</Title>
+            <Text>How does one handle doc format changes?
+Write doc format upgrade methods? How?
+
+[RESEARCH] Is it possible to save classes in JSON, or must one import data?
+Although it is safer to import/rebuild objects … don’t trust the source!
+Fail on malformed data (do proper error handling!)
+</Text>
         </Document>
         <Document ID="1">
             <Title>Planlegging</Title>
+        </Document>
+        <Document ID="16">
+            <Title>I18N/L10N</Title>
+            <Text>Any libraries or easy best practice ways to do I18N?
+(A la WordPress (e()?) for example …)
+</Text>
         </Document>
         <Document ID="15">
             <Title>Roadmap</Title>
@@ -16,17 +29,23 @@ v0.1
 	•	Save/Load single puzzle
 	•	Export solution
 v0.15
-	•	Changelog
-	•	Error handling
 	•	Git repository
+	•	Changelog
+	•	Error handling / Unit testing
+	⁃	Especially all model objects! Should fail gracefully if malformed data.
+	•	Clean up v0.1 code
+	⁃	Consistency in arguments: use hashes if more than one argument and for object constructors
+	•	[RESEARCH] I18N/L10N
 v0.2
 	•	Save/Load multiple puzzles
+	⁃	Interface?
+	⁃	Save to localStorage, but warn about cache clearing!
+	⁃	Save to local database?
+	⁃	Export JSON to tab/file?
 	•	Doc format:
 	⁃	Doc format version 0.2
 	⁃	Creation/Modification times
 	⁃	[RESEARCH] Incremental doc format upgrade method
-	⁃	[RESEARCH] Is it possible to save classes along with data in JSON?
-	⁃	Although it is safer to import/rebuild objects … don’t trust the source! Fail on malformed data …
 Wish list
 	•	Find/highlight current word(s)
 	•	Automatic, instant clue square generation
