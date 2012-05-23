@@ -59,8 +59,17 @@ XSquare.prototype.isClueSquare = function() {
 */
 
 function LetterSquare (arg) {
-	this.className = "LetterSquare";
+	if (arg===undefined) {
+		throw new Error("LetterSquare constructor called with no argument.");
+	}
+	if (arg.letter===undefined) {
+		throw new Error("LetterSquare constructor missing 'letter' argument.");
+	}
+	if (arg.letter.length!==1) {
+		throw new Error("LetterSquare constructor 'letter' argument too long; should be 1 character.");
+	}
 	this.letter = arg.letter.toLowerCase();
+	this.className = "LetterSquare";
 }
 LetterSquare.prototype = new XSquare();
 LetterSquare.prototype.isLetterSquare = function() {

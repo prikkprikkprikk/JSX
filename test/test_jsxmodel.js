@@ -6,7 +6,27 @@
 
 test("LetterSquare", function() {
 	// Create LetterSquare object
-	var xls = new LetterSquare("A");
+	raises(
+		function() { new LetterSquare(); },
+		"Creating LetterSquare with no argument should raise error."
+	);
+	raises(
+		function() { new LetterSquare( {foo:bar} ); },
+		"Creating LetterSquare with no 'letter' argument should raise error."
+	);
+	raises(
+		function() { new LetterSquare( {letter:1} ); },
+		"Creating LetterSquare with 'letter' argument that's not a string should raise error."
+	);
+	raises(
+		function() { new LetterSquare( {letter:[1] } ); },
+		"Creating LetterSquare with 'letter' argument that's not a string should raise error."
+	);
+	raises(
+		function() { new LetterSquare( {letter:1} ); },
+		"Creating LetterSquare with 'letter' argument as a string longer than 1 character should raise error."
+	);
+	var xls = new LetterSquare({letter:"A"});
 	ok(xls instanceof LetterSquare);
 	ok(xls instanceof XSquare);
 	equal(xls.getLetter(),"A");
@@ -15,7 +35,7 @@ test("LetterSquare", function() {
 test("XClue", function() {
 	raises(
 		function() { cs = new XClue(); },
-		"Creating XClue with no argument should raise error"
+		"Creating XClue with no argument should raise error."
 	);
 	raises(
 		function() { cs = new XClue(5); },
