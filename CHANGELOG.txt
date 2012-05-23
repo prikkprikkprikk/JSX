@@ -1,0 +1,9 @@
+JSX Changelog
+
+v0.1
+----
+Intitial version, with basic functionality:
+* Edit solution
+* Undo/redo solution edits
+* Save/load current puzzle to localStorage
+* Export solution to new tab (for pasting into Illustrator)
