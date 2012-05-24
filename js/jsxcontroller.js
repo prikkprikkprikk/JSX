@@ -197,7 +197,7 @@ function XController(){
 		// - place cursor at new positon
 		var cursorBeforeTyping = $.extend(true,{},_this.cursor);
 		var oldContent = this.getSquare(_this.cursor);
-		this.replaceSquare({cursor:_this.cursor, newContent:new LetterSquare(arg)});
+		this.replaceSquare({cursor:_this.cursor, newContent:new LetterSquare({config:config,letter:arg.letter})});
 		this.moveCursor();
 		var cursorAfterTyping = $.extend(true,{},_this.cursor);
 
@@ -213,7 +213,7 @@ function XController(){
 		undoData.redoFunc = _this.replaceSquare;
 		undoData.redoArg = {
 			cursor: $.extend(true,{},cursorBeforeTyping),
-			newContent: new LetterSquare(arg),
+			newContent: new LetterSquare({letter:arg.letter,config:config}),
 			newCursor: cursorAfterTyping
 		};
 		undo.add(undoData);

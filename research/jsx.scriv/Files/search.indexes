@@ -42,6 +42,8 @@ v0.2
 	⁃	Save to localStorage, but warn about cache clearing!
 	⁃	Save to local database?
 	⁃	Export JSON to tab/file?
+	•	New puzzle (Cmd–N)
+	⁃	Ask to save current puzzle
 	•	Doc format:
 	⁃	Doc format version 0.2
 	⁃	Creation/Modification times

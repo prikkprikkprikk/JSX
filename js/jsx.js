@@ -5,13 +5,13 @@ Copyright: Jørn Støylen © 2012
 Version: 0.1
 */
 
-var config;
+var config = new XConfig();
+
 var xcon;
 var xdata;
 
 $(document).ready(function() {
 
-	config = new XConfig();
 	xcon = new XController();
 	xdata = new XGridModel();
 
@@ -54,21 +54,4 @@ $(document).ready(function() {
 ======================================== Configuration
 
 */
-
-function XConfig() {
-	this.squareSize = 10; // mm
-//	this.ppmm = 6; // pixels per mm
-	this.ppmm = 4.5; // pixels per mm
-	this.fontSizeSolution = 40 * this.ppmm/6;
-	this.fontSizeClue = 13 * this.ppmm/6;
-	this.screenFillColor = "#fff";
-	this.screenCursorFillColor = "#acf";
-	this.screenCursorLineOpacity = .4;
-	this.screenStrokeColor = "#000";
-	this.strokeWidth = 0.2; // mm
-	this.alphabet = /[a-zæøå]/; // regexp
-}
-
-XConfig.prototype.squareSizeInPixels = function() { return this.squareSize * this.ppmm; };
-XConfig.prototype.strokeWidthInPixels = function() { return this.strokeWidth * this.ppmm; };
 

@@ -1,20 +1,44 @@
 /* Clue model
 */
 
-function XClue(data) {
-	// data is an associative array consisting of:
-	//   x, y = which adjacent square is the clue for? For example, {x:1,y:0} = the square to the right
-	//   d = in which direction goes the solution? I.e., in which direction should the arrow point?
-	//   h = hint text, with \n for line breaks
-	if (typeof data === "undefined") {
+function XClue(arg) {
+	// arg is an object with attributes x, y, d and (optionally) h:
+	//   x, y: 0 or 1 – which adjacent square is the clue for?
+	//         For example, {x:1,y:0} = the square to the right
+	//      d: "h" (horizontal) or "v" (vertical)
+	//         In which direction does the solution run? I.e., in which direction should the arrow point?
+	//      h: hint text, string with \n for line breaks
+	if (arg === undefined) {
 		throw new Error("XClue constructor called with no argument. It needs an array of clues as an argument!");
 	}
-	else if (!(data instanceof Object)) {
-		throw new Error("XClue constructor needs an object with properties x,y,d,h.");
+	if (!(arg instanceof Object)) {
+		throw new Error("XClue constructor needs an object with properties x,y,d and (optionally) h. See constructor comments for details.");
 	}
-	else {
-		this.data = data;
+	if (arg.x === undefined) {
+		throw new Error("XClue constructor missing 'x' argument.");
 	}
+	if (arg.y === undefined) {
+		throw new Error("XClue constructor missing 'y' argument.");
+	}
+	if (arg.d === undefined) {
+		throw new Error("XClue constructor missing 'd' argument.");
+	}
+	if ((typeof arg.x !== "number") || (arg.x !== 0 && arg.x !== 1)) {
+		throw new Error("XClue constructor 'x' argument missing or not one of 0 or 1.");
+	}
+	if ((typeof arg.y !== "number") || (arg.y !== 0 && arg.y !== 1)) {
+		throw new Error("XClue constructor 'y' argument missing or not one of 0 or 1.");
+	}
+	if ((arg.d !== "h") && (arg.d !== "v")) {
+		throw new Error("XClue constructor argument 'd' should be either 'h' or 'v'.");
+	}
+	if (arg.h === undefined) {
+		arg.h = "[N/A]";
+	}
+	if (typeof arg.h !== "string") {
+		throw new Error("XClue constructor argument 'h' should be a string.");
+	}
+	this.data = arg;
 }
 XClue.prototype.numLines = function() {
 	return this.getLines().length;
@@ -41,43 +65,44 @@ XClue.prototype.getSolutionDirection = function() {
 
 */
 
-/* Square Model – parent class
+
+/* XSquare Model – parent class
 */
 
 function XSquare() {
 	this.className = "XSquare";
 }
-XSquare.prototype.isLetterSquare = function() {
-	return this instanceof LetterSquare;
-};
-XSquare.prototype.isClueSquare = function() {
-	return this instanceof ClueSquare;
-};
+
 
 
 /* Letter Square model
 */
 
 function LetterSquare (arg) {
+	this.className = "LetterSquare";
 	if (arg===undefined) {
 		throw new Error("LetterSquare constructor called with no argument.");
 	}
-	if (arg.letter===undefined) {
-		throw new Error("LetterSquare constructor missing 'letter' argument.");
+	if (arg.config===undefined || arg.letter===undefined) {
+		throw new Error("LetterSquare constructor needs an object with two attributes:\n'letter' (single character string) and 'config' (XConfig object).");
 	}
+	if (!(arg.config instanceof XConfig)) {
+		throw new Error("LetterSquare config argument is not an XConfig object.");
+	}
+	this.config = arg.config;
 	if (arg.letter.length!==1) {
-		throw new Error("LetterSquare constructor 'letter' argument too long; should be 1 character.");
+		throw new Error("LetterSquare constructor 'letter' argument is wrong length; should be 1 character.");
 	}
 	this.letter = arg.letter.toLowerCase();
-	this.className = "LetterSquare";
+	if (!this.letter.match(this.config.alphabet)) {
+		throw new Error("LetterSquare constructor 'letter' argument not in alphabet.");
+	}
 }
 LetterSquare.prototype = new XSquare();
-LetterSquare.prototype.isLetterSquare = function() {
-	return true;
-};
 LetterSquare.prototype.getLetter = function() {
 	return this.letter.toUpperCase();
 };
+
 
 
 /* Empty Square model
@@ -87,6 +112,7 @@ function EmptySquare() {
 	this.className = "EmptySquare";
 }
 EmptySquare.prototype = new XSquare();
+
 
 
 /* Clue Square model
@@ -172,7 +198,7 @@ function XGridModel(arg) {
 						_this.grid[r][c] = new EmptySquare();
 						break;
 					case "LetterSquare":
-						_this.grid[r][c] = new LetterSquare(arg.grid[r][c]);
+						_this.grid[r][c] = new LetterSquare({letter:arg.grid[r][c].letter,config:config});
 						break;
 					case "ClueSquare":
 						_this.grid[r][c] = new ClueSquare(arg.grid[r][c]);
