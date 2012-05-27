@@ -1,0 +1,24 @@
+
+<!-- saved from url=(0182)https://stackauth.com/auth/global/read?request=N0Fg1JZKFSMU8puSd5ELL%2BszXWi7e66gMGzqGAlxn6Cp4w8HL%2F7o44G82zu3WkANolG5Owzf37zhhO1c4Yp%2BWg%3D%3D&nonce=cATCTwAAAACAxqHA%2BfDVIQ%3D%3D -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                  <script type="text/javascript">
+                  var data = {"ReadSession":"https://stackauth.com/auth/global/read-session","Request":"N0Fg1JZKFSMU8puSd5ELL+szXWi7e66gMGzqGAlxn6Cp4w8HL/7o44G82zu3WkANolG5Owzf37zhhO1c4Yp+Wg==","Nonce":"cATCTwAAAACAxqHA+fDVIQ==","Referrer":"http://stackoverflow.com/questions/2897619/using-html5-javascript-to-generate-and-save-a-file","StorageName":"GlobalLogin"};
+
+                  var toMsg = window.parent;
+
+                  var obj = localStorage.getItem(data.StorageName);
+                  if(obj != null) {
+                  var req = new XMLHttpRequest();
+                  req.open('POST', data.ReadSession+'?request='+encodeURIComponent(data.Request)+'&nonce='+encodeURIComponent(data.Nonce)+'&seriesAndToken='+encodeURIComponent(obj), false);
+                  req.send(null);
+                  
+                    if(req.status == 200){
+                      toMsg.postMessage(req.responseText, data.Referrer);
+                    }else{
+                      toMsg.postMessage('No Session', data.Referrer);
+                    }
+                  }else{
+                    toMsg.postMessage('No Local Storage', data.Referrer);
+                  }
+                  </script>
+                  <style type="text/css"></style></head><body></body></html>
