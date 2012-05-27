@@ -121,7 +121,8 @@ function SquareScreenView(svg, r, c, data) {
 	var classes = "row"+r+" col"+c + " squarebackground";
 	var id = "row"+r+"col"+c;
 	this.sq = svg.group($("#contentLayer"),{id:id, class:classes});
-	var parentGroup = $("#"+id);
+	var parentGroup = $("#"+id)[0];
+	console.log(parentGroup);
 	var sqfill = config.screenFillColor;
 	this.border = svg.rect($('#gridLayer'),this.xpos,this.ypos,this.sqsize,this.sqsize,{
 		class: classes,
@@ -134,6 +135,7 @@ function SquareScreenView(svg, r, c, data) {
 		// TODO: Use config for text appearance
 		this.l = svg.text(parentGroup,this.xpos+this.sqsize/2,this.ypos+this.sqsize/2+4,data.getLetter(),{
 			fill: "#000",
+			fillOpacity: "100",
 			fontFamily: "Myriad Pro",
 			fontSize: config.fontSizeSolution,
 			fontWeight: "bold",
