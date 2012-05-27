@@ -13,6 +13,21 @@ test("expect in test", 1, function() {
 	ok(true);
 });
 
+QUnit.module("assertion helpers");
+
+QUnit.test( "QUnit.assert compatibility", function( assert ) {
+	QUnit.expect(4);
+
+	assert.ok( true, "Calling method on `assert` argument to test() callback" );
+
+	// Should also work, although not documented
+	QUnit.assert.ok( true, "Calling method on QUnit.assert object" );
+
+	// Test compatibility aliases
+	QUnit.ok( true, "Calling aliased method in QUnit root object" );
+	ok( true, "Calling aliased function in global namespace" );
+});
+
 module("setup test", {
 	setup: function() {
 		ok(true);
@@ -329,6 +344,15 @@ test("basics", function() {
 	equal( document.getElementById("qunit-fixture").innerHTML, "test markup", "automatically reset" );
 });
 
+test("running test name displayed", function() {
+	expect(2);
+
+	var displaying = document.getElementById("qunit-testresult");
+
+	ok( /running test name displayed/.test(displaying.innerHTML), "Expect test name to be found in displayed text" );
+	ok( /fixture/.test(displaying.innerHTML), "Expect module name to be found in displayed text" );
+});
+
 }
 
 module("custom assertions");
@@ -452,23 +476,17 @@ test('Circular reference - test reported by soniciq in #105', function() {
 	deepEqual(a.children(), [b]);
 });
 
-
-
-
 (function() {
 	var reset = QUnit.reset;
-	function afterTest() {
-		ok( false, "reset should not modify test status" );
-	}
 	module("reset");
 	test("reset runs assertions", function() {
 		expect(0);
 		QUnit.reset = function() {
-			afterTest();
+			ok( false, "reset should not modify test status" );
 			reset.apply( this, arguments );
 		};
 	});
-	test("reset runs assertions2", function() {
+	test("reset runs assertions, cleanup", function() {
 		expect(0);
 		QUnit.reset = reset;
 	});

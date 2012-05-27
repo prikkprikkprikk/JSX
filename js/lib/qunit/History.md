@@ -1,3 +1,25 @@
+1.6.0 / 2012-05-04
+==================
+
+  * Save stack for each test, use that for failed expect() results, points at the line where test() was called. Fixes #209
+  * Prefix test-output id and ignore that in noglobals check. Fixes #212
+  * Only check for an exports object to detect a CommonJS enviroment. Fixes #237 - Incompatibility with require.js
+  * Add testswarm integration as grunt task
+  * Added padding on URL config checkboxes.
+  * Cleanup composite addon: Use callback registration instead of overwriting them. Set the correct src on rerun link (and dblclick). Remove the composite test itself, as that was a crazy hack not worth maintaining
+  * Cleanup reset() test and usage - run testDone callback first, to allow listeneres ignoring reset assertions
+  * Double clicking on composite test rows opens individual test page
+  * test-message for all message-bearing API reporting details
+
+1.5.0 / 2012-04-04
+==================
+
+  * Modify "Running..." to display test name. Fixes #220
+  * Fixed clearing of sessionStorage in Firefox 3.6.
+  * Fixes #217 by calling "block" with config.current.testEnvironment
+  * Add stats results to data. QUnit.jUnitReport function take one argument {   xml:'<?xml ...',   results:{failed:0, passed:0, total:0, time:0} }
+  * Add link to MDN about stack property
+
 1.4.0 / 2012-03-10
 ==================
 

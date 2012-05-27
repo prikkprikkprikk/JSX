@@ -6,10 +6,10 @@
 	<false/>
 	<key>QRPanelSettings</key>
 	<dict>
-		<key>13</key>
+		<key>16</key>
 		<dict>
 			<key>BinderID</key>
-			<integer>13</integer>
+			<integer>16</integer>
 			<key>CurrentMetaData</key>
 			<integer>-1</integer>
 			<key>ShowsFormatBar</key>
@@ -26,12 +26,12 @@
 				<integer>150</integer>
 			</dict>
 			<key>WindowFrame</key>
-			<string>1312 495 475 522 0 0 1920 1178 </string>
+			<string>991 512 475 522 0 0 1920 1178 </string>
 		</dict>
-		<key>19</key>
+		<key>17</key>
 		<dict>
 			<key>BinderID</key>
-			<integer>19</integer>
+			<integer>17</integer>
 			<key>CurrentMetaData</key>
 			<integer>-1</integer>
 			<key>ShowsFormatBar</key>
@@ -48,29 +48,7 @@
 				<integer>150</integer>
 			</dict>
 			<key>WindowFrame</key>
-			<string>1121 84 743 958 0 0 1920 1178 </string>
-		</dict>
-		<key>20</key>
-		<dict>
-			<key>BinderID</key>
-			<integer>20</integer>
-			<key>CurrentMetaData</key>
-			<integer>-1</integer>
-			<key>ShowsFormatBar</key>
-			<true/>
-			<key>ShowsMetaData</key>
-			<false/>
-			<key>SplitInfo</key>
-			<array>
-				<string>{{0, 273}, {475, 163}}</string>
-			</array>
-			<key>TextSettings</key>
-			<dict>
-				<key>textScale</key>
-				<integer>150</integer>
-			</dict>
-			<key>WindowFrame</key>
-			<string>66 148 844 535 0 0 1920 1178 </string>
+			<string>1064 390 782 695 0 0 1920 1178 </string>
 		</dict>
 	</dict>
 	<key>QuickRefFloatBehavior</key>
@@ -523,9 +501,9 @@
 	<key>mainDocumentEditor.outlinerVisible</key>
 	<false/>
 	<key>mainDocumentEditor.scrollRect</key>
-	<string>{{0, 0}, {1036, 682.66669}}</string>
+	<string>{{0, 90}, {1036, 682.66669}}</string>
 	<key>mainDocumentEditor.selectedRanges</key>
-	<string>{259, 0}</string>
+	<string>{599, 0}</string>
 	<key>mainDocumentEditor.textEditorState</key>
 	<dict>
 		<key>hasMultiplePages</key>

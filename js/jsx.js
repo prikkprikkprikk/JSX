@@ -32,7 +32,6 @@ $(document).ready(function() {
 	// Menu
 	$("#exportSolution").click(function(){
 		var ev = new XGridExportSolutionView(xdata);
-		console.log(ev);
 		var html = ev.getHtml();
 		var exportWindow = window.open("","exportWindow");
 		exportWindow.document.open();

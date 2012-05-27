@@ -46,8 +46,6 @@ XGridScreenView.prototype.load = function(data) {
 	this.data = data;
 	$("#svgcanvas svg").children().remove();
 
-	console.log(this.svg);
-
 	// Set up layers
 	this._createLayer('background');
 	this._createLayer('grid');
