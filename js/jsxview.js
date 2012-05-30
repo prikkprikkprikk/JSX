@@ -22,10 +22,10 @@ function XGridExportSolutionView(data) {
 }
 XGridExportSolutionView.prototype.getHtml = function() {
 	var html = "<body><pre>";
+	var letter = "";
 	for (r=0; r<this.data.height; r++) {
 		for(c=0; c<this.data.width; c++) {
-			var letter = this.data.getLetter(r,c);
-			html += "\t" + (letter||"");
+			html += "\t" + (this.data.grid[r][c].letter||"");
 		}
 		if(r<this.data.height-1) {
 			html += "\n";
@@ -122,7 +122,6 @@ function SquareScreenView(svg, r, c, data) {
 	var id = "row"+r+"col"+c;
 	this.sq = svg.group($("#contentLayer"),{id:id, class:classes});
 	var parentGroup = $("#"+id)[0];
-	console.log(parentGroup);
 	var sqfill = config.screenFillColor;
 	this.border = svg.rect($('#gridLayer'),this.xpos,this.ypos,this.sqsize,this.sqsize,{
 		class: classes,

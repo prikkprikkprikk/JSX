@@ -132,7 +132,6 @@ function XController(){
 			e.altKey?"Alt":"",
 			e.metaKey?"Cmd":"",
 			e.ctrlKey?"Ctrl":""
-			// TODO: Ctrl key also registers as meta key! How to distinguish between them?
 		);
 		// metaKey=true -> Cmd or Ctrl key pressed
 		// ctrlKey!=true -> Cmd+key shortcut (on Mac)
