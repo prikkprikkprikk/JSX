@@ -1,3 +1,5 @@
+/* @override http://jsx.local/css/jsx.css */
+
 html {
 	font-size: 10px;
 }
@@ -6,6 +8,10 @@ body {
 	background-color: #000;
 	font-family: "Myriad Pro";
 	font-size: 1.4em;
+}
+
+p, h1, h2 {
+  margin: 0;
 }
 
 #svgcanvas {
@@ -27,7 +33,7 @@ body {
 }
 
 #menu {
-  position: absolute;
+  float: left;
   width: 12em;
 }
 
@@ -45,43 +51,32 @@ body {
   text-decoration: none;
 }
 
-#feedback {
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  display: none;
-}
-
-.modal {
+#dialog-background {
   background: rgba(0,0,0,.7);
+  display: none;
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
 }
 
-#message {
-	background-color: #fff;
-	border-radius: 20px;
-	border: 5px solid gray;
-	color: #333;
-	display: table;
-	margin: 0 auto 0 auto;
-	padding: 1em;
-	position: relative;
-	text-align: center;
-	top: 30%;
+#dialog {
 }
 
-#message h1 {
-  font-size: 1.5em;
-  margin: 0;
+#dialog form {
+  background-color: #fff;
+  border: 5px solid gray;
+  border-top: none;
+  border-bottom-left-radius: .5em;
+  border-bottom-right-radius: .5em;
+  display: table;
+  margin: 0 auto 0 auto;
+  padding: 1em;
+  text-align: center;
 }
 
-#message p {
-  margin: 0;
-}
-
-#message form textarea {
-  color: #999;
+#dialog form textarea {
   width: 100%;
 }
 
@@ -93,15 +88,32 @@ body {
 	margin-left: 1em;
 }
 
-#message.ok {
+#feedback {
+	clear: left;
+	float: left;
+	margin: .5em;
+}
+
+.message {
+	background-color: #fff;
+	border-radius: 10px;
+	border: 5px solid gray;
+	color: #333;
+	display: table;
+	margin: 0 auto 0 auto;
+	padding: .5em;
+	position: relative;
+	text-align: center;
+}
+
+.ok {
   border-color: green;
 }
 
-#message.error {
+.error {
   border-color: red;
 }
 
-#message.form {
-  border-color: gray;
+.message h1 {
+  font-size: 1.5em;
 }
-

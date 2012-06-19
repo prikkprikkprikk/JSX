@@ -136,7 +136,7 @@ function XController(){
 		// metaKey=true -> Cmd or Ctrl key pressed
 		// ctrlKey!=true -> Cmd+key shortcut (on Mac)
 		// TODO: Maybe add support for Windows (Ctrl) shortcuts?
-		if (e.metaKey && !e.ctrlKey) {
+		if (e.metaKey && !e.ctrlKey && !e.altKey) {
 			switch (eid) {
 				case "U+005A": // Z
 					if (e.shiftKey) { // Cmd-Shift-Z
@@ -420,19 +420,16 @@ function XController(){
 		this.setCursor({r:0,c:0,d:"h"});
 	};
 	this.showImportForm = function() {
-		var html = '<form id="formImport"><h1>Importer løsning</h1><p>Lim inn løsninga du vil importere her og klikk på "Importer"-knappen.</p><textarea id="toImport" rows="10"></textarea><br><input type="button" value="Avbryt" id="buttonImportCancel"><input id="buttonImportSubmit" type="submit" value="Importer"></form>';
-		this.showDialog(html);
-		$("#toImport").select();
-		$("#buttonImportCancel").click(function(){
-			xcon.hideDialog();
-		});
-	};
-	this.showDialog = function(html) {
-		$(document).unbind("keydown",this.keyHandler);
 		var _this = this;
-		$("#message").html(html).addClass("form");
-		$("#feedback").addClass("modal").fadeIn(100);
-		$("#formImport").submit(function(){
+		var formHTML =
+		'<form id="formImport">\
+			<h1>Importer løsning</h1>\
+			<p>Lim inn løsninga du vil importere her og klikk på "Importer"-knappen.</p>\
+			<textarea id="toImport" rows="10"></textarea><br>\
+			<input type="button" value="Avbryt" id="buttonImportCancel">\
+			<input id="buttonImportSubmit" type="submit" value="Importer">\
+		</form>';
+		var formHandler = function(){
 			var toImport = $("#toImport").val();
 			try {
 				xdata.importSolution(toImport);
@@ -441,16 +438,31 @@ function XController(){
 				_this.showFeedback(e.message,"error");
 				_this.hideDialog();
 			}
+			_this.hideDialog();
 			_this.showFeedback("Importert!");
 			_this.resetBrowserView();
+		};
+		this.showDialog(formHTML,formHandler);
+		$("#toImport").select();
+		$("#buttonImportCancel").click(function(){
+			_this.hideDialog();
 		});
 	};
+	this.showDialog = function(html,handler) {
+		var _this = this;
+		$(document).unbind("keydown",this.keyHandler);
+		html = '<div id="dialog">' + html + '</div>';
+		$("#dialog-background").html(html).fadeIn(100);
+		$("#dialog").hide().slideDown();
+		$("#dialog form").submit(handler);
+	};
 	this.hideDialog = function() {
-		$("#feedback").fadeOut(100);
+		$("#dialog").slideUp(100,function(){$("#dialog-background").fadeOut(100);});
 		$(document).keydown(this.keyHandler);
 	};
 	this.showFeedback = function(message,status) {
-		var delay = 500;
+		var delay = 2000;
+		var fadeout = 250;
 		if (status===undefined) {
 			status = "ok";
 		}
@@ -460,7 +472,11 @@ function XController(){
 		else if (status!=="ok" && status!=="error") {
 			throw new Error("Wrong status for feedback message.");
 		}
-		$("#message").html(message).addClass(status);
-		$("#feedback").removeClass("modal").show().delay(delay).fadeOut(250);
+		var msgid = "msg"+Date.now();
+		var jqmsgid = "#"+msgid;
+		console.log(jqmsgid);
+		$("#feedback").append('<div id="'+msgid+'" class="message '+status+'">'+message+'</div>');
+		$(jqmsgid).show().delay(delay).fadeOut(fadeout);
+		setTimeout(function(){$(jqmsgid).remove();},delay+fadeout+500);
 	};
 };
