@@ -501,9 +501,9 @@
 	<key>mainDocumentEditor.outlinerVisible</key>
 	<false/>
 	<key>mainDocumentEditor.scrollRect</key>
-	<string>{{0, 90}, {1036, 682.66669}}</string>
+	<string>{{0, 0}, {1036, 682.66669}}</string>
 	<key>mainDocumentEditor.selectedRanges</key>
-	<string>{599, 0}</string>
+	<string>{171, 0}</string>
 	<key>mainDocumentEditor.textEditorState</key>
 	<dict>
 		<key>hasMultiplePages</key>

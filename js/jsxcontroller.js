@@ -156,6 +156,10 @@ function XController(){
 					e.preventDefault();
 					_this.load();
 					break;
+				case "U+0049": // I (import)
+					e.preventDefault();
+					_this.showImportForm();
+					break;
 				default:
 			}
 		}
@@ -396,6 +400,7 @@ function XController(){
 	this.save = function() {
 		var savedData = JSON.stringify(this.xdata);
 		localStorage.setItem("jsxsave", savedData);
+		this.showFeedback("Lagret!");
 	};
 	this.load = function() {
 		var loadedData = localStorage.getItem("jsxsave");
@@ -403,6 +408,7 @@ function XController(){
 			_this.xdata = new XGridModel(JSON.parse(loadedData));
 			console.log('Loading crossword "'+_this.xdata.title+'"');
 			_this.resetBrowserView();
+			this.showFeedback("Lastet!");
 		}
 		else {
 			console.log("Nothing to load!");
@@ -412,5 +418,49 @@ function XController(){
 	this.resetBrowserView = function() {
 		this.bv = new XGridScreenView(this.svg,this.xdata); // bv = browser view
 		this.setCursor({r:0,c:0,d:"h"});
+	};
+	this.showImportForm = function() {
+		var html = '<form id="formImport"><h1>Importer løsning</h1><p>Lim inn løsninga du vil importere her og klikk på "Importer"-knappen.</p><textarea id="toImport" rows="10"></textarea><br><input type="button" value="Avbryt" id="buttonImportCancel"><input id="buttonImportSubmit" type="submit" value="Importer"></form>';
+		this.showDialog(html);
+		$("#toImport").select();
+		$("#buttonImportCancel").click(function(){
+			xcon.hideDialog();
+		});
+	};
+	this.showDialog = function(html) {
+		$(document).unbind("keydown",this.keyHandler);
+		var _this = this;
+		$("#message").html(html).addClass("form");
+		$("#feedback").addClass("modal").fadeIn(100);
+		$("#formImport").submit(function(){
+			var toImport = $("#toImport").val();
+			try {
+				xdata.importSolution(toImport);
+			}
+			catch(e) {
+				_this.showFeedback(e.message,"error");
+				_this.hideDialog();
+			}
+			_this.showFeedback("Importert!");
+			_this.resetBrowserView();
+		});
+	};
+	this.hideDialog = function() {
+		$("#feedback").fadeOut(100);
+		$(document).keydown(this.keyHandler);
+	};
+	this.showFeedback = function(message,status) {
+		var delay = 500;
+		if (status===undefined) {
+			status = "ok";
+		}
+		else if (status==="error") {
+			delay = 3000;
+		}
+		else if (status!=="ok" && status!=="error") {
+			throw new Error("Wrong status for feedback message.");
+		}
+		$("#message").html(message).addClass(status);
+		$("#feedback").removeClass("modal").show().delay(delay).fadeOut(250);
 	};
 };

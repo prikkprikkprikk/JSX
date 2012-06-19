@@ -221,3 +221,33 @@ XGridModel.prototype.getLetter = function(row,col) {
 	}
 	return false;
 };
+XGridModel.prototype.importSolution = function(data) {
+	var _this = this;
+	var rows = data.split("\n");
+	var incomingGrid = [];
+	var newGrid = new Array();
+	for (i=0;i<rows.length;i++) {
+		incomingGrid[i] = rows[i].substring(1).split("\t");
+	}
+	var first_line_length = incomingGrid[0].length;
+	for (r=0;r<incomingGrid.length;r++) {
+		if (incomingGrid[r].length!=first_line_length) {
+			var msg = "<h1>Feil: Ulike radlengder!</h1><p>Rad "+(r+1)+" er "+incomingGrid[r].length+" ruter lang, mens<br>første (og anslagsgivende) rad er "+first_line_length+" ruter lang.</p>";
+			throw new Error(msg);
+		} 
+		newGrid[r] = new Array();
+		for (c=0;c<incomingGrid[r].length;c++) {
+			if (incomingGrid[r][c]==="") {
+				console.log("emptysquare");
+				newGrid[r][c] = new EmptySquare();
+			}
+			else {
+				newGrid[r][c] = new LetterSquare({letter:incomingGrid[r][c],config:config});
+			}
+		}
+	}
+	this.grid = newGrid;
+	this.height = this.grid.length;
+	this.width = this.grid[0].length;
+	this.title = "Kryssord uten tittel";
+};

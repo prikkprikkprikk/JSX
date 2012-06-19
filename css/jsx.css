@@ -44,3 +44,64 @@ body {
   text-align: center;
   text-decoration: none;
 }
+
+#feedback {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: none;
+}
+
+.modal {
+  background: rgba(0,0,0,.7);
+}
+
+#message {
+	background-color: #fff;
+	border-radius: 20px;
+	border: 5px solid gray;
+	color: #333;
+	display: table;
+	margin: 0 auto 0 auto;
+	padding: 1em;
+	position: relative;
+	text-align: center;
+	top: 30%;
+}
+
+#message h1 {
+  font-size: 1.5em;
+  margin: 0;
+}
+
+#message p {
+  margin: 0;
+}
+
+#message form textarea {
+  color: #999;
+  width: 100%;
+}
+
+#buttonImportCancel {
+	margin-right: 1em;
+}
+
+#buttonImportSubmit {
+	margin-left: 1em;
+}
+
+#message.ok {
+  border-color: green;
+}
+
+#message.error {
+  border-color: red;
+}
+
+#message.form {
+  border-color: gray;
+}
+
