@@ -121,6 +121,31 @@ function XController(){
 		}
 		this.resetBrowserView();
 	};
+	this.dialogKeyHandler = function(e) {
+		var eid = e.originalEvent.keyIdentifier;
+		var kc = e.originalEvent.keyCode;
+		var c = String.fromCharCode(eid.replace("U+","0x")).toLowerCase();
+		_this.debug.clear();
+		_this.debug.log(
+			"Key:",e.originalEvent.keyCode,eid,c,"<br>",
+			e.shiftKey?"Shift":"",
+			e.altKey?"Alt":"",
+			e.metaKey?"Cmd":"",
+			e.ctrlKey?"Ctrl":""
+		);
+		if (eid==="U+001B") {
+			e.preventDefault();
+			$("#buttonImportCancel").click();
+		}
+		if (e.metaKey && !e.ctrlKey && !e.altKey) {
+			switch (eid) {
+				case "Enter":
+					e.preventDefault();
+					$("buttonImportSubmit").click();
+					break;
+			}
+		}
+	};
 	this.keyHandler = function(e) {
 		var eid = e.originalEvent.keyIdentifier;
 		var kc = e.originalEvent.keyCode;
@@ -133,6 +158,7 @@ function XController(){
 			e.metaKey?"Cmd":"",
 			e.ctrlKey?"Ctrl":""
 		);
+		var singleKey = !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey;
 		// metaKey=true -> Cmd or Ctrl key pressed
 		// ctrlKey!=true -> Cmd+key shortcut (on Mac)
 		// TODO: Maybe add support for Windows (Ctrl) shortcuts?
@@ -164,7 +190,7 @@ function XController(){
 			}
 		}
 		// If character is in alphabet, change current letter.
-		else if (c.match(config.alphabet)) {
+		else if (c.match(config.alphabet) && singleKey) {
 			_this.userTypedLetter({letter:c});
 		}
 		else {
@@ -451,6 +477,7 @@ function XController(){
 	this.showDialog = function(html,handler) {
 		var _this = this;
 		$(document).unbind("keydown",this.keyHandler);
+		$(document).keydown(this.dialogKeyHandler);
 		html = '<div id="dialog">' + html + '</div>';
 		$("#dialog-background").html(html).fadeIn(100);
 		$("#dialog").hide().slideDown();
@@ -458,6 +485,7 @@ function XController(){
 	};
 	this.hideDialog = function() {
 		$("#dialog").slideUp(100,function(){$("#dialog-background").fadeOut(100);});
+		$(document).unbind("keydown",this.dialogKeyHandler);
 		$(document).keydown(this.keyHandler);
 	};
 	this.showFeedback = function(message,status) {

@@ -46,6 +46,14 @@ XGridScreenView.prototype.load = function(data) {
 	this.data = data;
 	$("#svgcanvas svg").children().remove();
 
+	var canvasWidth =  ""+(_this.data.width * config.squareSizeInPixels() + 2 * config.strokeWidthInPixels())+"px";
+	var canvasHeight = ""+(_this.data.height * config.squareSizeInPixels() + 2 * config.strokeWidthInPixels())+"px";
+	$("#svgcanvas").css({
+		backgroundColor: '#ddd',
+		width: canvasWidth,
+		height: canvasHeight
+	});
+
 	// Set up layers
 	this._createLayer('background');
 	this._createLayer('grid');

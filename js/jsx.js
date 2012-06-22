@@ -15,12 +15,6 @@ $(document).ready(function() {
 	xcon = new XController();
 	xdata = new XGridModel();
 
-	$('#svgcanvas').css({
-		backgroundColor: '#ddd',
-		width: '500px',
-		height: '1000px'
-	});
-	
 	xcon.init(xdata);
 
 	// Keyboard event handler
