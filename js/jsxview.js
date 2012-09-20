@@ -20,6 +20,7 @@ function XView() {
 function XGridExportSolutionView(data) {
 	this.data = data;
 }
+
 XGridExportSolutionView.prototype.getHtml = function() {
 	var html = "<body><pre>";
 	var letter = "";
@@ -35,12 +36,14 @@ XGridExportSolutionView.prototype.getHtml = function() {
 	return html;
 };
 
+
 function XGridScreenView(svg,data) {
 	var _this = this;
 	this.svg = svg;
 	this.load(data);
 }
 XGridScreenView.prototype = new XView();
+
 XGridScreenView.prototype.load = function(data) {
 	var _this = this;
 	this.data = data;
@@ -78,14 +81,17 @@ XGridScreenView.prototype.load = function(data) {
 		}
 	}
 };
+
 XGridScreenView.prototype._createLayer = function(name) {
 	layerID = name + "Layer";
 	this.svg.group({id:layerID});
 };
+
 XGridScreenView.prototype.getLayer = function(name) {
 	layerID = name + "Layer";
 	return $(layerID);
 };
+
 XGridScreenView.prototype.updateSquare = function(arg) {
 	var r = arg.cursor.r;
 	var c = arg.cursor.c;
@@ -138,6 +144,10 @@ function SquareScreenView(svg, r, c, data) {
 		fillOpacity: 0,
 		strokeWidth: config.strokeWidthInPixels()
 	});
+	this.border.onclick = function() {
+		var newPos = {r:r,c:c};
+		xcon.moveCursorTo(newPos);
+	};
 	if (data instanceof LetterSquare) {
 		// TODO: Use config for text appearance
 		this.l = svg.text(parentGroup,this.xpos+this.sqsize/2,this.ypos+this.sqsize/2+4,data.getLetter(),{

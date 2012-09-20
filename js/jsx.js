@@ -19,7 +19,6 @@ $(document).ready(function() {
 
 	// Keyboard event handler
 	$(document).keydown(xcon.keyHandler);
-	// TODO: Add mouse event capturing/handling.
 	
 	// Setup custom events and handlers.
 

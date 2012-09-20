@@ -1,6 +1,7 @@
 /*
 ======================================== Debug
 */
+
 function XDebug(id) {
 	this.init(id);
 	this.buffer = "";
@@ -92,7 +93,6 @@ function XUndoManager(contr) {
 			action = $.extend(true,{},redoHistory.shift());
 			controller.hideCursor();
 			action.redoFunc(action.redoArg);
-			// TODO: Set cursor to whatever it was right after the action being undone was done
 			controller.setCursor(action.redoArg.newCursor);
 			undoHistory.unshift($.extend(true,{},action));
 		}
@@ -145,6 +145,10 @@ function XController(){
 					break;
 			}
 		}
+	};
+	this.mouseHandler = function(e) {
+		_this.debug.clear();
+		_this.debug.log("Mouse clicked!");
 	};
 	this.keyHandler = function(e) {
 		var eid = e.originalEvent.keyIdentifier;
@@ -397,6 +401,13 @@ function XController(){
 		}
 		_this.setCursor(_this.cursor);
 	};
+	this.moveCursorTo = function( pos ) {
+		var _this = this;
+		_this.hideCursor();
+		_this.cursor.r = pos.r;
+		_this.cursor.c = pos.c;
+		_this.setCursor(_this.cursor);
+	};
 	this.hideCursor = function() {
 		$('.squarebackground').attr('fill',config.screenFillColor).attr('fill-opacity',0);
 	};
@@ -434,7 +445,8 @@ function XController(){
 			_this.xdata = new XGridModel(JSON.parse(loadedData));
 			console.log('Loading crossword "'+_this.xdata.title+'"');
 			_this.resetBrowserView();
-			this.showFeedback("Lastet!");
+			undo = new XUndoManager(this); // Reset undo!
+			_this.showFeedback("Lastet!");
 		}
 		else {
 			console.log("Nothing to load!");
