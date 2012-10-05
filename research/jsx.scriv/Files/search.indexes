@@ -28,27 +28,38 @@ v0.1
 	•	Undo/Redo solution
 	•	Save/Load single puzzle
 	•	Export solution
-v0.15
+v0.11
 	•	Git repository
 	•	Changelog
-	•	Error handling / Unit testing
-	⁃	Especially all model objects! Should fail gracefully if malformed data.
-	•	Clean up v0.1 code
-	⁃	Consistency in arguments: use hashes if more than one argument and for object constructors
-	•	[RESEARCH] I18N/L10N
-v0.2
+	•	Import solution
+	•	Feedback when saving/loading
+	•	Place cursor by mouse click
+v0.12
+	•	Autosave
+	•	New puzzle
+	•	Dialog box on new/load if current puzzle has unsaved changes
+	•	Display puzzle title, click it to edit
+Wish list
+	•	Document format versioning
+	•	Limit puzzle title characters (alphanumeric, space, dash, underscore)
 	•	Save/Load multiple puzzles
 	⁃	Interface?
 	⁃	Save to localStorage, but warn about cache clearing!
 	⁃	Save to local database?
 	⁃	Export JSON to tab/file?
-	•	New puzzle (Cmd–N)
-	⁃	Ask to save current puzzle
+	⁃	JSONP to communicate with database server?
 	•	Doc format:
 	⁃	Doc format version 0.2
 	⁃	Creation/Modification times
 	⁃	[RESEARCH] Incremental doc format upgrade method
-Wish list
+	•	Error handling / Unit testing
+	⁃	Especially all model objects! Should fail gracefully if malformed data.
+	•	Clean up v0.1 code
+	⁃	Consistency in arguments: use hashes if more than one argument and for object constructors
+	•	[RESEARCH] JSON object reconstruction
+	•	[RESEARCH] I18N/L10N
+	•	
+	•	Highlight ranges, look up in dictionaries
 	•	Find/highlight current word(s)
 	•	Automatic, instant clue square generation
 	•	Clue square editing
@@ -60,6 +71,19 @@ Wish list
         </Document>
         <Document ID="0">
             <Title>Innhold</Title>
+        </Document>
+        <Document ID="18">
+            <Title>Document format versioning</Title>
+            <Synopsis>Note on: Roadmap</Synopsis>
+            <Text>XController.load():
+	Get JSON data from localStorage
+	If no version number:
+		upgrade to v1.
+	else
+		upgrade to next version
+		this.load()
+
+</Text>
         </Document>
     </Documents>
 </SearchIndexes>

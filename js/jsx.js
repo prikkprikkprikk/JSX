@@ -2,20 +2,16 @@
 Application name: JSX – Javascript Crossword Generator
 Author: Jørn Støylen
 Copyright: Jørn Støylen © 2012
-Version: 0.1
+Version: 0.12
 */
 
 var config = new XConfig();
+var xcon = new XController();
 
-var xcon;
-var xdata;
 
 $(document).ready(function() {
 
-	xcon = new XController();
-	xdata = new XGridModel();
-
-	xcon.init(xdata);
+	xcon.init();
 
 	// Keyboard event handler
 	$(document).keydown(xcon.keyHandler);
@@ -32,18 +28,20 @@ $(document).ready(function() {
 		exportWindow.document.close();
 		return false;
 	});
+	$("#importSolution").click(function(){
+		xcon.showImportForm();
+		return false;
+	});
+	$("#new").click(function(){
+		xcon.newCrossword();
+		return false;
+	});
+	$("#load").click(function(){
+		xcon.load("jsxsave");
+		return false;
+	});
 	$("#save").click(function(){
 		xcon.save();
 		return false;
 	});
-	$("#load").click(function(){
-		xcon.load();
-		return false;
-	});
 });
-
-/*
-======================================== Configuration
-
-*/
-

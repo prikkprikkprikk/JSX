@@ -175,7 +175,7 @@ function XGridModel(arg) {
 	var _this = this;
 	this.grid = new Array();
 	if (arg === undefined) {
-		this.title = "Test-kryssord 01";
+		this.title = "";
 		this.width = 9;
 		this.height = 21;
 		for (var r=0; r < this.height; r++) {
@@ -238,7 +238,6 @@ XGridModel.prototype.importSolution = function(data) {
 		newGrid[r] = new Array();
 		for (c=0;c<incomingGrid[r].length;c++) {
 			if (incomingGrid[r][c]==="") {
-				console.log("emptysquare");
 				newGrid[r][c] = new EmptySquare();
 			}
 			else {
@@ -249,5 +248,4 @@ XGridModel.prototype.importSolution = function(data) {
 	this.grid = newGrid;
 	this.height = this.grid.length;
 	this.width = this.grid[0].length;
-	this.title = "Kryssord uten tittel";
 };

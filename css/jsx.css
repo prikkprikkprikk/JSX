@@ -14,11 +14,26 @@ p, h1, h2 {
   margin: 0;
 }
 
+#document {
+  position: absolute;
+  top: 1em;
+  left: 15em;
+}
+
+#documentTitle {
+  color: #ccc;
+  font-weight: bold;
+}
+
+#documentTitle .noTitle {
+  color: #999;
+}
+
 #svgcanvas {
 	background-color: #000;
 	width: 0px;
 	height: 0px;
-	margin: 0 auto;
+	margin: 1em 0 0 0;
 }
 
 #debugWrapper {
@@ -34,7 +49,8 @@ p, h1, h2 {
 
 #menu {
   float: left;
-  width: 12em;
+  width: 11em;
+  margin: .5em;
 }
 
 #menu a {
@@ -45,10 +61,14 @@ p, h1, h2 {
   display: block;
   font-weight: bold;
   letter-spacing: .1em;
-  margin: .5em;
+  margin: 0 0 .5em 0;
   padding: .6em .5em .3em .5em;
   text-align: center;
   text-decoration: none;
+}
+
+#menu #importSolution {
+  margin-top: 1.5em;
 }
 
 #dialog-background {

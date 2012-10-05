@@ -2,8 +2,9 @@
 <Links Version="1.0">
     <ScrivenerLinks>
         <TextLinks>
-            <LinkID Range="377,9">16</LinkID>
-            <LinkID Range="697,10">17</LinkID>
+            <LinkID Range="372,26">18</LinkID>
+            <LinkID Range="771,10">17</LinkID>
+            <LinkID Range="1076,9">16</LinkID>
         </TextLinks>
     </ScrivenerLinks>
 </Links>

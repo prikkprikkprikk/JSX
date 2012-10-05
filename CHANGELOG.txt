@@ -1,5 +1,18 @@
 JSX Changelog
 
+v0.12
+-----
+* Autosave
+* New puzzle
+* Dialog box on new/load if current puzzle has unsaved changes
+* Display puzzle title, click it to edit
+
+v0.11
+-----
+* Import solution
+* Feedback when saving/loading
+* Place cursor by mouse click
+
 v0.1
 ----
 Intitial version, with basic functionality:

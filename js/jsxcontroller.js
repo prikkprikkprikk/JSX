@@ -75,6 +75,7 @@ function XUndoManager(contr) {
 		*/
 		undoHistory.unshift($.extend(true,{},data));
 		redoHistory.length = 0;
+		contr.autosave();
 		this.buildDebugBuffer();
 	};
 	this.undo = function() {
@@ -86,6 +87,7 @@ function XUndoManager(contr) {
 			controller.bv.updateSquare(action.undoArg);
 			controller.setCursor(action.undoArg.newCursor);
 		}
+		contr.autosave();
 		this.buildDebugBuffer();
 	};
 	this.redo = function() {
@@ -96,6 +98,7 @@ function XUndoManager(contr) {
 			controller.setCursor(action.redoArg.newCursor);
 			undoHistory.unshift($.extend(true,{},action));
 		}
+		contr.autosave();
 		this.buildDebugBuffer();
 	};
 }
@@ -110,16 +113,37 @@ function XController(){
 	var undo = new XUndoManager(this);
 	this.cursor = {r:0,c:0,d:"h"};
 	this.debug = new XDebug("XController");
-	this.init = function(data) {
+	this.init = function() {
 		$("#svgcanvas").svg();
 		this.svg = $("#svgcanvas").svg('get');
-		if (data === undefined) {
-			_this.load();
+		// TODO: If autosave, load it. If no autosave, load last save, if any. Else load blank puzzle.
+		if (_this.hasAutosave()) {
+			_this.load("jsxautosave");
+		}
+		else if (localStorage.jsxsave!==undefined) {
+			_this.load("jsxsave")
 		}
 		else {
-			_this.xdata = data;
+			_this.xdata = new XGridModel();
 		}
 		this.resetBrowserView();
+		this.makeTitleEditable();
+	};
+	this.makeTitleEditable = function() {
+		$("#documentTitle").attr("title","Click to edit");
+		$("#documentTitle").click(function() {
+			var oldTitle = $(this).html();
+			var editBox = '<form id="editTitle"><input id="editTitleInput" type="text" style="width:20em;"></form>';
+			$(document).unbind("keydown",_this.keyHandler);
+			$(this).html(editBox);
+			$("#editTitleInput").val(oldTitle).focus().select();
+			$("#editTitle").submit(function(e) {
+				console.log(e);
+				_this.xdata.title = $("#editTitleInput").val();
+				$("#documentTitle").html(_this.xdata.title);
+				$(document).keydown(_this.keyHandler);
+			});
+		});
 	};
 	this.dialogKeyHandler = function(e) {
 		var eid = e.originalEvent.keyIdentifier;
@@ -178,17 +202,21 @@ function XController(){
 						undo.undo();
 					}
 					break;
-				case "U+0053": // S (save)
-					e.preventDefault();
-					_this.save();
-					break;
-				case "U+004C": // L (load)
-					e.preventDefault();
-					_this.load();
-					break;
 				case "U+0049": // I (import)
 					e.preventDefault();
 					_this.showImportForm();
+					break;
+				case "U+004C": // L (load)
+					e.preventDefault();
+					_this.load("jsxsave");
+					break;
+				case "U+004E": // N (new)
+					e.preventDefault();
+					_this.new();
+					break;
+				case "U+0053": // S (save)
+					e.preventDefault();
+					_this.save();
 					break;
 				default:
 			}
@@ -434,28 +462,96 @@ function XController(){
 		var squareData = this.xdata.grid[arg.r][arg.c];
 		return squareData;
 	};
+	this.autosave = function() {
+		var savedData = JSON.stringify(this.xdata);
+		localStorage.setItem("jsxautosave", savedData);
+	};
 	this.save = function() {
 		var savedData = JSON.stringify(this.xdata);
 		localStorage.setItem("jsxsave", savedData);
+		localStorage.removeItem("jsxautosave");
 		this.showFeedback("Lagret!");
 	};
-	this.load = function() {
-		var loadedData = localStorage.getItem("jsxsave");
+	this.newCrossword = function() {
+		console.log("Ny oppgave!");
+		if (this.hasAutosave()) {
+			this.showNewDiscardChanges();
+		}
+		else {
+			this.resetCrossword();
+		};
+	};
+	this.resetCrossword = function() {
+		_this.xdata = new XGridModel();
+		this.resetBrowserView();
+	};
+	this.hasAutosave = function() {
+		return ( localStorage.jsxautosave === undefined ? false : true );
+	};
+	this.load = function(item) {
+		if (item != "jsxautosave" && this.hasAutosave()) {
+			this.showLoadDiscardChanges();
+		}
+		else {
+			this.resetCrossword();
+		};
+		var loadedData;
+		if (item!==undefined) {
+			loadedData = localStorage.getItem(item);
+		}
 		if (loadedData) {
 			_this.xdata = new XGridModel(JSON.parse(loadedData));
 			console.log('Loading crossword "'+_this.xdata.title+'"');
 			_this.resetBrowserView();
-			undo = new XUndoManager(this); // Reset undo!
+			undo = new XUndoManager(this); // Reset undo history
+			localStorage.removeItem("jsxautosave"); // Remove any autosave
 			_this.showFeedback("Lastet!");
 		}
 		else {
-			console.log("Nothing to load!");
+			console.log("Could not find item '"+item+"'!");
 			return false;
 		}
 	};
 	this.resetBrowserView = function() {
-		this.bv = new XGridScreenView(this.svg,this.xdata); // bv = browser view
-		this.setCursor({r:0,c:0,d:"h"});
+		var _this = this;
+		_this.bv = new XGridScreenView(_this.svg,_this.xdata); // bv = browser view
+		_this.setCursor({r:0,c:0,d:"h"});
+	};
+	this.showLoadDiscardChanges = function() {
+		var _this = this;
+		var dialogHTML =
+		'<form id="discardChanges">\
+			<h1>Laste kryssord</h1>\
+			<p>Det finnes ulagrede endringer! Vil du likevel fortsette?</p>\
+			<input type="button" value="Nei, avbryt!" id="buttonNewCancel">\
+			<input type="button" value="Ja, forkast endringene" id="buttonNewDiscard">\
+		</form>';
+		this.showDialog(dialogHTML);
+		$("#buttonNewCancel").click(function(){
+			_this.hideDialog();
+		});
+		$("#buttonNewDiscard").click(function(){
+			_this.hideDialog();
+			_this.load();
+		});
+	};
+	this.showNewDiscardChanges = function() {
+		var _this = this;
+		var dialogHTML =
+		'<form id="discardChanges">\
+			<h1>Nytt kryssord</h1>\
+			<p>Det finnes ulagrede endringer! Vil du likevel fortsette?</p>\
+			<input type="button" value="Nei, avbryt!" id="buttonNewCancel">\
+			<input type="button" value="Ja, forkast endringene" id="buttonNewDiscard">\
+		</form>';
+		this.showDialog(dialogHTML);
+		$("#buttonNewCancel").click(function(){
+			_this.hideDialog();
+		});
+		$("#buttonNewDiscard").click(function(){
+			_this.hideDialog();
+			_this.resetCrossword();
+		});
 	};
 	this.showImportForm = function() {
 		var _this = this;
@@ -470,15 +566,14 @@ function XController(){
 		var formHandler = function(){
 			var toImport = $("#toImport").val();
 			try {
-				xdata.importSolution(toImport);
+				_this.xdata.importSolution(toImport);
 			}
 			catch(e) {
 				_this.showFeedback(e.message,"error");
-				_this.hideDialog();
 			}
 			_this.hideDialog();
-			_this.showFeedback("Importert!");
 			_this.resetBrowserView();
+			_this.showFeedback("Importert!");
 		};
 		this.showDialog(formHTML,formHandler);
 		$("#toImport").select();
@@ -488,12 +583,14 @@ function XController(){
 	};
 	this.showDialog = function(html,handler) {
 		var _this = this;
-		$(document).unbind("keydown",this.keyHandler);
-		$(document).keydown(this.dialogKeyHandler);
+		$(document).unbind("keydown",_this.keyHandler);
+		$(document).keydown(_this.dialogKeyHandler);
 		html = '<div id="dialog">' + html + '</div>';
 		$("#dialog-background").html(html).fadeIn(100);
 		$("#dialog").hide().slideDown();
-		$("#dialog form").submit(handler);
+		if (handler) {
+			$("#dialog form").submit(handler);
+		}
 	};
 	this.hideDialog = function() {
 		$("#dialog").slideUp(100,function(){$("#dialog-background").fadeOut(100);});
@@ -514,7 +611,6 @@ function XController(){
 		}
 		var msgid = "msg"+Date.now();
 		var jqmsgid = "#"+msgid;
-		console.log(jqmsgid);
 		$("#feedback").append('<div id="'+msgid+'" class="message '+status+'">'+message+'</div>');
 		$(jqmsgid).show().delay(delay).fadeOut(fadeout);
 		setTimeout(function(){$(jqmsgid).remove();},delay+fadeout+500);

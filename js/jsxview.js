@@ -47,6 +47,17 @@ XGridScreenView.prototype = new XView();
 XGridScreenView.prototype.load = function(data) {
 	var _this = this;
 	this.data = data;
+
+	this.title = this.data.title;
+	if (this.data.title=="") {
+		this.title = "[Uten tittel]";
+		$("#documentTitle").addClass("noTitle")
+	}
+	else {
+		$("#documentTitle").removeClass("noTitle")
+	}
+	$("#documentTitle").html(this.title);
+
 	$("#svgcanvas svg").children().remove();
 
 	var canvasWidth =  ""+(_this.data.width * config.squareSizeInPixels() + 2 * config.strokeWidthInPixels())+"px";

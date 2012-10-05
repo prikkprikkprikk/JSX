@@ -53,6 +53,8 @@
 	</dict>
 	<key>QuickRefFloatBehavior</key>
 	<integer>3</integer>
+	<key>ScrivenerLinkDestinationGroupID</key>
+	<integer>1</integer>
 	<key>binderIsCollapsed</key>
 	<false/>
 	<key>binderSelection</key>
@@ -229,7 +231,7 @@
 	<key>mainDocumentEditor.navigationHistory</key>
 	<dict>
 		<key>CurrentIndex</key>
-		<integer>32</integer>
+		<integer>34</integer>
 		<key>NavigationHistoryArray</key>
 		<array>
 			<dict>
@@ -468,6 +470,22 @@
 				<key>BinderDocIDs</key>
 				<array>
 					<integer>16</integer>
+				</array>
+				<key>ViewMode</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>BinderDocIDs</key>
+				<array>
+					<integer>15</integer>
+				</array>
+				<key>ViewMode</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>BinderDocIDs</key>
+				<array>
+					<integer>17</integer>
 				</array>
 				<key>ViewMode</key>
 				<integer>0</integer>
