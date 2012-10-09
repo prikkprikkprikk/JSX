@@ -1,5 +1,9 @@
 JSX Changelog
 
+v0.13
+-----
+* Select range (with shift+arrow or mouse click+drag)
+
 v0.12
 -----
 * Autosave

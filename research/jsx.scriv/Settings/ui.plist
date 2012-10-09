@@ -50,6 +50,28 @@
 			<key>WindowFrame</key>
 			<string>1064 390 782 695 0 0 1920 1178 </string>
 		</dict>
+		<key>18</key>
+		<dict>
+			<key>BinderID</key>
+			<integer>18</integer>
+			<key>CurrentMetaData</key>
+			<integer>-1</integer>
+			<key>ShowsFormatBar</key>
+			<true/>
+			<key>ShowsMetaData</key>
+			<false/>
+			<key>SplitInfo</key>
+			<array>
+				<string>{{0, 273}, {475, 163}}</string>
+			</array>
+			<key>TextSettings</key>
+			<dict>
+				<key>textScale</key>
+				<integer>150</integer>
+			</dict>
+			<key>WindowFrame</key>
+			<string>1180 477 475 522 0 0 1920 1178 </string>
+		</dict>
 	</dict>
 	<key>QuickRefFloatBehavior</key>
 	<integer>3</integer>
@@ -519,9 +541,9 @@
 	<key>mainDocumentEditor.outlinerVisible</key>
 	<false/>
 	<key>mainDocumentEditor.scrollRect</key>
-	<string>{{0, 0}, {1036, 682.66669}}</string>
+	<string>{{0, 99.333336}, {1036, 682.66669}}</string>
 	<key>mainDocumentEditor.selectedRanges</key>
-	<string>{171, 0}</string>
+	<string>{471, 0}</string>
 	<key>mainDocumentEditor.textEditorState</key>
 	<dict>
 		<key>hasMultiplePages</key>

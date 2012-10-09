@@ -7,34 +7,44 @@ function XDebug(id) {
 	this.buffer = "";
 }
 XDebug.prototype.parentID ="debugWrapper";
-XDebug.prototype.parentSelector = "#"+XDebug.prototype.parentID;
+XDebug.prototype.parentDiv = "#"+XDebug.prototype.parentID;
 XDebug.prototype.init = function(id) {
-	id += "Debug";
-	this.id = id;
-	this.selector = "#"+id;
-	if ($(this.parentSelector).length===0) {
+	this.id = id+"Debug";
+	this.outerDiv = "#"+this.id;
+	this.innerDiv = this.outerDiv + " div.debugLog";
+	if ($(this.parentDiv).length===0) {
 		$("body").append("<div id='"+this.parentID+"'></div>");
 	}
-	if ($(this.selector).length===0) {
-		$(this.parentSelector).append("<div id='"+this.id+"'></div>").append;
-	}
-};
-XDebug.prototype.log = function() {
-	if (arguments.length>0) {
-		for(s in arguments) {
-			this.buffer += arguments[s] + " ";
-		}
-	}
-	$(this.selector).html("<h2>"+this.id+"</h2><p>"+this.buffer+"</p>");
-};
-XDebug.prototype.add = function() {
-	for(s in arguments) {
-		this.buffer += arguments[s];
+	if ($(this.outerDiv).length===0) {
+		$(this.parentDiv).append('<div class="debugHeader" id="'+this.id+'"><h2>'+this.id+'</h2><div class="debugLog"></div></div>').append;
 	}
 };
 XDebug.prototype.clear = function() {
 	// Empty the buffer
 	this.buffer = "";
+};
+XDebug.prototype.log = function() {
+	if (arguments.length>0) {
+		if (this.buffer!="") this.buffer += "<br>";
+		for(s in arguments) {
+			this.buffer += arguments[s] + " ";
+		}
+	}
+	$(this.innerDiv).html(this.buffer);
+};
+XDebug.prototype.replace = function() {
+	this.clear();
+	if (arguments.length>0) {
+		for(s in arguments) {
+			this.buffer += arguments[s] + " ";
+		}
+	}
+	this.log();
+};
+XDebug.prototype.add = function() {
+	for(s in arguments) {
+		this.buffer += arguments[s];
+	}
 };
 
 
@@ -85,7 +95,8 @@ function XUndoManager(contr) {
 			controller.hideCursor();
 			action.undoFunc(action.undoArg);
 			controller.bv.updateSquare(action.undoArg);
-			controller.setCursor(action.undoArg.newCursor);
+			controller.cursor = action.undoArg.newCursor;
+			controller.showCursor();
 		}
 		contr.autosave();
 		this.buildDebugBuffer();
@@ -95,13 +106,303 @@ function XUndoManager(contr) {
 			action = $.extend(true,{},redoHistory.shift());
 			controller.hideCursor();
 			action.redoFunc(action.redoArg);
-			controller.setCursor(action.redoArg.newCursor);
+			controller.cursor = action.redoArg.newCursor
+			controller.showCursor();
 			undoHistory.unshift($.extend(true,{},action));
 		}
 		contr.autosave();
 		this.buildDebugBuffer();
 	};
 }
+
+
+function Cursor(arg) {
+	// r: Cursor's row position.
+	// c: Cursor's column position.
+	// d: Typing direction.
+	// l: Length of selection. 0 when no selection; otherwise, it's number of squares from current cursor in the current direction. Negative numbers means backwards from the cursor, and would be most normal since one normally selects from left to right, placing the cursor at the end of the selection.
+	this.controller = arg.controller;
+	this.debug = new XDebug("Cursor");
+	this.selecting = false;
+	this.set(arg);
+	this.selectionOrigin = {};
+}
+Cursor.prototype.set = function(arg) {
+	if (arg===undefined) {
+		// Easiest way to make the rest of this function simpler.
+		arg={}
+	} else {
+		// Sanity checks; improper arguments are simply ignored.
+		if ( arg.hasOwnProperty("r") && ( !this._isInteger(arg.r) || !this._isWithinRows(arg.r) ) ) { delete arg.r; }
+		if ( arg.hasOwnProperty("c") && ( !this._isInteger(arg.c) || !this._isWithinCols(arg.c) ) ) { delete arg.c; }
+		if ( arg.hasOwnProperty("d") && ( arg.d!="h" || arg.d!="v") ) { delete arg.d; }
+		if ( arg.hasOwnProperty("l") && ( !this._isValidSelection(arg.l) ) ) { delete arg.l; }
+	}
+	// If variables are not set, set them to defaults.
+	// If no argument given, don't change the values.
+	// This means you later can set any number of these properties:
+	//   cursor.set({r:5,d:"v"}) => doesn't touch c or l
+	this.r = arg.r || this.r || 0;
+	this.c = arg.c || this.c || 0;
+	this.d = arg.d || this.d || "h";
+	this.l = arg.l || this.l || 0;
+	this.dx = 0;
+	this.dy = 0;
+};
+Cursor.prototype._isValidSelection = function( n ) {
+	return	(this.d = "h" && this.c+n>0 && this.c+n<this._lastCol() ) ||
+			(this.d = "v" && this.r+n>0 && this.r+n<this._lastRow() );
+};
+Cursor.prototype._isInteger = function(n) {
+	if (typeof n == "number" && n == Math.floor(n)) {
+		return true;
+	} else {
+		return false;
+	}
+};
+Cursor.prototype._isWithinRows = function(r) { return (r>=0 && r<this._lastRow()); };
+Cursor.prototype._isWithinCols = function(c) { return (c>=0 && c<this._lastCol()); };
+Cursor.prototype._lastRow = function() { return this.controller.xdata.height-1; };
+Cursor.prototype._lastCol = function() { return this.controller.xdata.width-1; };
+Cursor.prototype.startMouseSelection = function( pos ) {
+	this.selecting = true;
+	this.l = 0;
+	this.selectionOrigin = pos;
+	this.startDirection = "";
+	this.moveTo(pos);
+	this.log();
+};
+Cursor.prototype.updateMouseSelection = function( pos ) {
+	// If no current selection (l=1), set direction by comparing current pos with incoming pos.
+	// (In case of equal horizontal and vertical distances, current direction wins.)
+	xcon.hideCursor();
+	this.dy = pos.r - this.selectionOrigin.r;
+	this.dx = pos.c - this.selectionOrigin.c;
+	if (this.startDirection=="") {
+		if (this.dx!=0) { this.startDirection = "h" }
+		else if (this.dy!=0) { this.startDirection = "v" }
+	}
+	if (Math.abs(this.dx)>Math.abs(this.dy)) {
+		this.d = "h";
+		this.c = pos.c;
+		this.r = this.selectionOrigin.r;
+		this.l = this.selectionOrigin.c-pos.c;
+		this.moveTo({r:this.selectionOrigin.r,c:pos.c});
+	}
+	else if (Math.abs(this.dx)<Math.abs(this.dy)) {
+		this.d = "v";
+		this.r = pos.r;
+		this.c = this.selectionOrigin.c;
+		this.l = this.selectionOrigin.r-pos.r;
+		this.moveTo({r:pos.r,c:this.selectionOrigin.c});
+	}
+	else if ( this.dx == this.dy ) {
+		if (this.dx == 0 && this.dy==0) {
+			// If back at origin
+			this.moveTo(this.selectionOrigin);
+			this.l = 0;
+		}
+		else {
+			this.d = this.startDirection;
+			if (this.startDirection=="h") {
+				this.moveTo({r:this.selectionOrigin.r,c:pos.c});
+				this.l = this.selectionOrigin.c-pos.c;
+			}
+			else if (this.startDirection=="v") {
+				this.moveTo({r:pos.r,c:this.selectionOrigin.c});
+				this.l = this.selectionOrigin.r-pos.r;
+			}
+		}
+	}
+	xcon.showCursor();
+	this.log();
+};
+Cursor.prototype.endMouseSelection = function( pos ) {
+	this.selecting = false;
+
+	// TODO: Set selection
+	this.log();
+};
+Cursor.prototype.clearSelection = function() {
+	this.l = 0;
+	this.selectionOrigin = {};
+};
+Cursor.prototype.getSelection = function() {
+	if (this.l==0) return false;
+	var selectedSquares = [];
+	var dir = (this.d == "h"?"c":"r");
+	var notDir = (this.d == "h"?"r":"c");
+	var start = end = this[dir];
+	if (this.l<0) { start += this.l; }
+	else { end += this.l }
+	for (var i = start; i <= end; i++) {
+		var o = {};
+		o[dir] = i;
+		o[notDir] = this[notDir];
+		selectedSquares.push(o);
+	};
+	return selectedSquares;
+};
+Cursor.prototype.move = function(arg) {
+	// arg: dir = "Right", "Down", "Left", "Up"
+	//		typing = true if user is typing, false if doing an undo/redo step (default)
+	var _this = this;
+	this.controller.hideCursor();
+	var typing = false;
+	if (arg!==undefined) {
+		typing === arg.typing || false;
+	}
+	var dir = "";
+	if (arg===undefined || arg.dir === undefined) {
+		dir = _this.d === "h"? "Right" : "Down";
+		typing = true;
+	}
+	else if (arg!==undefined && arg.dir==="Forward") {
+		dir = _this.d === "h"? "Right" : "Down";
+	}
+	else if (arg!==undefined && arg.dir==="Backward") {
+		dir = _this.d === "h"? "Left" : "Up";
+	}
+	else if (arg!==undefined && arg.dir!==undefined) {
+		dir = arg.dir;
+	}
+	switch (dir) {
+		case "Up":
+			if (_this.d==="h" && !arg.e.cmdKeyOnly) {
+				_this.switchDirection();
+				_this.l = 0;
+			}
+			else {
+				_this.r--;
+				if (_this.r<0) {
+					if (arg.e.shiftKey) {
+						_this.r=0;
+					}
+					else {
+						_this.r = _this._lastRow();
+						_this.l = 0;
+					}
+				}
+				else {
+					if (arg.e.shiftKey) {
+						_this.l++;
+					}
+					else {
+						_this.l=0;
+					}
+				}
+			}
+			break;
+		case "Down":
+			if (_this.d==="h" && !arg.e.cmdKeyOnly) {
+				_this.switchDirection();
+				_this.l = 0;
+			}
+			else {
+				_this.r++;
+				if (_this.r>_this._lastRow()) {
+					if (typing || arg.e.shiftKey) {
+						_this.r = _this._lastRow();
+					}
+					else {
+						_this.r = 0;
+						_this.l = 0;
+					}
+				}
+				else {
+					if (arg.e.shiftKey) {
+						_this.l--;
+					}
+					else {
+						_this.l=0;
+					}
+				}
+			}	
+			break;
+		case "Left":
+			if (_this.d==="v" && !arg.e.cmdKeyOnly) {
+				_this.switchDirection();
+				_this.l = 0;
+			}
+			else {
+				_this.c--;
+				if (_this.c<0) {
+					if (arg.e.shiftKey) {
+						_this.c=0;
+					}
+					else {
+						_this.c = _this._lastCol();
+						_this.l = 0;
+					}
+				}
+				else {
+					if (arg.e.shiftKey) {
+						_this.l++;
+					}
+					else {
+						_this.l = 0;
+					}
+				}
+			}
+			break;
+		case "Right":
+			if (_this.d==="v" && !arg.e.cmdKeyOnly) {
+				_this.switchDirection();
+				_this.l = 0;
+			}
+			else {
+				_this.c++;
+				if (_this.c>_this._lastCol()) {
+					if (typing || arg.e.shiftKey) {
+						_this.c = this._lastCol();
+					}
+					else {
+						_this.c = 0;
+						_this.l = 0;
+					};
+				}
+				else {
+					if (arg.e.shiftKey) {
+						_this.l--;
+					}
+					else {
+						_this.l = 0;
+					}
+				}
+			}
+			break;
+		default:
+	}
+	_this.controller.showCursor();
+	this.log();
+};
+Cursor.prototype.moveTo = function( pos ) {
+	this.controller.hideCursor();
+	this.r = pos.r;
+	this.c = pos.c;
+	this.controller.showCursor();
+	this.log();
+};
+Cursor.prototype.switchDirection = function() {
+	this.controller.hideCursor();
+	if (this.d=="h") { this.d="v"; }
+	else { this.d="h"; }
+	this.l = 0;
+	this.controller.showCursor();
+	this.log();
+};
+Cursor.prototype.log = function() {
+	this.debug.clear();
+	this.debug.log(
+		"row:",this.r,"<br>col:",this.c,"<br>dir:",this.d,"<br>selection length:",this.l,
+		this.selecting?"<br>[selecting]":"",
+		"<br>dx: "+this.dx+" - dy: "+this.dy,
+		"<br>selectionOrigin: r="+this.selectionOrigin.r+" c="+this.selectionOrigin.c,
+		"<br>startDirection: "+this.startDirection
+	);
+};
+
+
 
 
 /*
@@ -111,9 +412,11 @@ function XUndoManager(contr) {
 function XController(){
 	var _this = this;
 	var undo = new XUndoManager(this);
-	this.cursor = {r:0,c:0,d:"h"};
-	this.debug = new XDebug("XController");
+	this.cursor = new Cursor({controller:this});
+	this.selecting = false;
 	this.init = function() {
+		this.debug = new XDebug("XController");
+		this.viewDebug = new XDebug("XView");
 		$("#svgcanvas").svg();
 		this.svg = $("#svgcanvas").svg('get');
 		// TODO: If autosave, load it. If no autosave, load last save, if any. Else load blank puzzle.
@@ -128,22 +431,25 @@ function XController(){
 		}
 		this.resetBrowserView();
 		this.makeTitleEditable();
+		this.showCursor();
 	};
 	this.makeTitleEditable = function() {
-		$("#documentTitle").attr("title","Click to edit");
-		$("#documentTitle").click(function() {
+		var clickTitle = function() {
 			var oldTitle = $(this).html();
 			var editBox = '<form id="editTitle"><input id="editTitleInput" type="text" style="width:20em;"></form>';
 			$(document).unbind("keydown",_this.keyHandler);
 			$(this).html(editBox);
 			$("#editTitleInput").val(oldTitle).focus().select();
 			$("#editTitle").submit(function(e) {
-				console.log(e);
 				_this.xdata.title = $("#editTitleInput").val();
 				$("#documentTitle").html(_this.xdata.title);
 				$(document).keydown(_this.keyHandler);
+				$("#documentTitle").click(clickTitle);
 			});
-		});
+			$("#documentTitle").attr("title","Click to edit");
+			$(this).unbind("click"); // Or else a click on the textbox will also be captured
+		};
+		$("#documentTitle").click(clickTitle);
 	};
 	this.dialogKeyHandler = function(e) {
 		var eid = e.originalEvent.keyIdentifier;
@@ -170,28 +476,38 @@ function XController(){
 			}
 		}
 	};
-	this.mouseHandler = function(e) {
-		_this.debug.clear();
-		_this.debug.log("Mouse clicked!");
-	};
 	this.keyHandler = function(e) {
+		// Amend event object's lack of cmd key distinguishing.
+		// metaKey==true -> Cmd or Ctrl key pressed
+		// metaKey==true && ctrlKey!=true -> Cmd+key shortcut (on Mac)
+		// NOTE: Cmd and Ctrl cannot be used at the same time at this point!
+		// TODO: Maybe try to figure out how to do that? Or just fuhgeddaboudit.
+		// TODO: Maybe add support for Windows (Ctrl) shortcuts?
+		e.cmdKey = (e.metaKey && !e.ctrlKey);
+		// Since we're using lots of keyboard shortcuts with just Cmd+key ...
+		e.cmdKeyOnly = (e.cmdKey && !e.altKey && !e.shiftKey);
 		var eid = e.originalEvent.keyIdentifier;
 		var kc = e.originalEvent.keyCode;
 		var c = String.fromCharCode(eid.replace("U+","0x")).toLowerCase();
 		_this.debug.clear();
-		_this.debug.log(
-			"Key:",e.originalEvent.keyCode,eid,c,"<br>",
-			e.shiftKey?"Shift":"",
-			e.altKey?"Alt":"",
-			e.metaKey?"Cmd":"",
-			e.ctrlKey?"Ctrl":""
+		_this.debug.add(
+			"Key: ",e.originalEvent.keyCode, " ", eid, " ", c,"<br>",
+			e.shiftKey?"Shift ":"",
+			e.altKey?"Alt ":"",
+			(e.metaKey && !e.ctrlKey)?"Cmd ":"",
+			e.ctrlKey?"Ctrl" :""
 		);
+		_this.debug.log();
 		var singleKey = !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey;
-		// metaKey=true -> Cmd or Ctrl key pressed
-		// ctrlKey!=true -> Cmd+key shortcut (on Mac)
-		// TODO: Maybe add support for Windows (Ctrl) shortcuts?
-		if (e.metaKey && !e.ctrlKey && !e.altKey) {
+		if (e.cmdKeyOnly) {
 			switch (eid) {
+				case "Up":
+				case "Down":
+				case "Left":
+				case "Right":
+					e.preventDefault(); // prevent page scrolling
+					_this.cursor.move({dir:eid,typing:true,e:e});
+					break;
 				case "U+005A": // Z
 					if (e.shiftKey) { // Cmd-Shift-Z
 						e.preventDefault();
@@ -223,7 +539,7 @@ function XController(){
 		}
 		// If character is in alphabet, change current letter.
 		else if (c.match(config.alphabet) && singleKey) {
-			_this.userTypedLetter({letter:c});
+			_this.userTypedLetter({letter:c,e:e});
 		}
 		else {
 			switch (eid) {
@@ -232,16 +548,16 @@ function XController(){
 				case "Left":
 				case "Right":
 					e.preventDefault(); // prevent page scrolling
-					_this.moveCursor({dir:eid,typing:true,e:e});
+					_this.cursor.move({dir:eid,typing:true,e:e});
 					break;
 				case "Alt":
-					_this.switchDirection();
+					_this.cursor.switchDirection();
 					break;
 				case "U+0020": // space
 				case "U+0008": // backspace
 				case "U+007F": // delete
 					e.preventDefault();
-					_this.userDeletedSquare({cursor:_this.cursor,eid:eid});
+					_this.userDeletedSquare({eid:eid,e:e});
 					break;
 				default:
 			}
@@ -259,7 +575,7 @@ function XController(){
 		var cursorBeforeTyping = $.extend(true,{},_this.cursor);
 		var oldContent = this.getSquare(_this.cursor);
 		this.replaceSquare({cursor:_this.cursor, newContent:new LetterSquare({config:config,letter:arg.letter})});
-		this.moveCursor();
+		this.cursor.move({e:arg.e});
 		var cursorAfterTyping = $.extend(true,{},_this.cursor);
 
 		var undoData = {};
@@ -298,7 +614,7 @@ function XController(){
 		// Delete key doesn't move cursor.
 
 		if (arg.eid==="U+0008") { // Backspace
-			_this.moveCursor({dir:"Backward",typing:true});
+			_this.cursor.move({dir:"Backward",typing:true,e:arg.e});
 		}
 
 		var deletedSquare = $.extend(true,{},_this.cursor);
@@ -318,7 +634,7 @@ function XController(){
 		if (arg.eid==="U+0020") { // Space
 			if ( !( (_this.cursor.d==="h" && _this.cursor.c===(_this.xdata.width-1))
 				||  (_this.cursor.d==="v" && _this.cursor.r===(_this.xdata.height-1)) ) ) {
-				_this.moveCursor({dir:"Forward",typing:true});
+				_this.cursor.move({dir:"Forward",typing:true,e:arg.e});
 			}
 		}
 		var cursorAfterDeletion = $.extend(true,{},_this.cursor);
@@ -334,124 +650,37 @@ function XController(){
 			newCursor: cursorAfterDeletion
 		};
 		undo.add(undoData);
-		_this.setCursor(_this.cursor);
+		_this.showCursor();
 	};
 	this.deleteSquare = function(arg) {
 		// arguments:
 		// cursor: Cursor with which square should be deleted
 		_this.replaceSquare({cursor:arg.cursor,newContent:new EmptySquare});
 	};
-	this.switchDirection = function() {
-		var _this = this;
-		_this.hideCursor();
-		if (_this.cursor.d=="h") {
-			_this.cursor.d="v";
-		}
-		else {
-			_this.cursor.d="h";
-		}
-		this.setCursor(_this.cursor);
-	};
-	this.moveCursor = function(arg) {
-		// arg: dir = "Right", "Down", "Left", "Up"
-		//		typing = true if user is typing, false if doing an undo/redo step (default)
-		var _this = this;
-		_this.hideCursor();
-		var typing = false;
-		if (arg!==undefined) {
-			typing === arg.typing || false;
-		}
-		var dir = "";
-		if (arg===undefined || arg.dir === undefined) {
-			dir = this.cursor.d === "h"? "Right" : "Down";
-			typing = true;
-		}
-		else if (arg!==undefined && arg.dir==="Forward") {
-			dir = this.cursor.d === "h"? "Right" : "Down";
-		}
-		else if (arg!==undefined && arg.dir==="Backward") {
-			dir = this.cursor.d === "h"? "Left" : "Up";
-		}
-		else if (arg!==undefined && arg.dir!==undefined) {
-			dir = arg.dir;
-		}
-		switch (dir) {
-			case "Up":
-				if (_this.cursor.d==="h" && !arg.e.shiftKey) {
-					_this.switchDirection();
-				}
-				else {
-					_this.cursor.r--;
-					if (_this.cursor.r<0) {_this.cursor.r += _this.xdata.height};
-				}
-				break;
-			case "Down":
-				if (_this.cursor.d==="h" && !arg.e.shiftKey) {
-					_this.switchDirection();
-				}
-				else {
-					_this.cursor.r++;
-					if (_this.cursor.r===_this.xdata.height) {
-						if (typing) {
-							_this.cursor.r = _this.xdata.height - 1;
-						} else {
-							_this.cursor.r = 0;
-						}
-					}
-				}	
-				break;
-			case "Left":
-				if (_this.cursor.d==="v" && !arg.e.shiftKey) {
-					_this.switchDirection();
-				}
-				else {
-					_this.cursor.c--;
-					if (_this.cursor.c<0) {_this.cursor.c += _this.xdata.width};
-				}
-				break;
-			case "Right":
-				if (_this.cursor.d==="v" && !arg.e.shiftKey) {
-					_this.switchDirection();
-				}
-				else {
-					_this.cursor.c++;
-					if (_this.cursor.c===_this.xdata.width) {
-						if (typing) {
-							_this.cursor.c = _this.xdata.width - 1;
-						}
-						else {
-							_this.cursor.c = 0;
-						}
-					}
-				}
-				break;
-			default:
-		}
-		_this.setCursor(_this.cursor);
-	};
-	this.moveCursorTo = function( pos ) {
-		var _this = this;
-		_this.hideCursor();
-		_this.cursor.r = pos.r;
-		_this.cursor.c = pos.c;
-		_this.setCursor(_this.cursor);
-	};
 	this.hideCursor = function() {
 		$('.squarebackground').attr('fill',config.screenFillColor).attr('fill-opacity',0);
 	};
-	this.setCursor = function(cursor) {
-		var _this = this;
-		_this.cursor = $.extend(true,{},cursor);
-		$(_this.lineBackgroundSelector(cursor)).attr('fill',config.screenCursorFillColor).attr('fill-opacity',config.screenCursorLineOpacity);
-		$(_this.cursorBackgroundSelector(cursor)).attr('fill-opacity',1);
+	this.showCursor = function() {
+		$(this.lineBackgroundSelector()).attr('fill',config.screenCursorFillColor).attr('fill-opacity',config.screenCursorLineOpacity);
+		if (this.cursor.l!=0) {
+			this.selectionBackgroundSelector();
+		}
+		$(this.cursorBackgroundSelector()).attr('fill-opacity',1);
+		// $(this.selectionBackgroundSelector).attr('fill',config.screenCursorFillColor).attr('fill-opacity',config.screenSelectionOpacity);
 	};
-	this.cursorBackgroundSelector = function(cursor) {
-		var _this = this;
-		return "#gridLayer .row"+cursor.r+".col"+cursor.c+".squarebackground";
+	this.cursorBackgroundSelector = function() {
+		return "#gridLayer .row"+this.cursor.r+".col"+this.cursor.c+".squarebackground";
 	};
-	this.lineBackgroundSelector = function(cursor) {
-		var _this = this;
-		return "#gridLayer ."+(cursor.d=="h"?'row'+cursor.r:'col'+_this.cursor.c)+".squarebackground";
+	this.selectionBackgroundSelector = function() {
+		var selectedSquares = this.cursor.getSelection();
+		var selector = "";
+		for (var i = 0; i < selectedSquares.length; i++) {
+			selector += "#gridLayer .row"+selectedSquares[i].r+".col"+selectedSquares[i].c+", ";
+		}
+		$(selector).attr('fill',config.screenCursorFillColor).attr('fill-opacity',config.screenSelectionOpacity);
+	};
+	this.lineBackgroundSelector = function() {
+		return "#gridLayer ."+(this.cursor.d=="h"?'row'+this.cursor.r:'col'+this.cursor.c)+".squarebackground";
 	};
 	this.replaceSquare = function(arg) {
 		// TODO: Why doesn't this work when using xdata.setSquare()?? Is it because the model is included before the view, so the view is defined after the model???
@@ -482,7 +711,7 @@ function XController(){
 		};
 	};
 	this.resetCrossword = function() {
-		_this.xdata = new XGridModel();
+		this.xdata = new XGridModel();
 		this.resetBrowserView();
 	};
 	this.hasAutosave = function() {
@@ -500,12 +729,11 @@ function XController(){
 			loadedData = localStorage.getItem(item);
 		}
 		if (loadedData) {
-			_this.xdata = new XGridModel(JSON.parse(loadedData));
-			console.log('Loading crossword "'+_this.xdata.title+'"');
-			_this.resetBrowserView();
+			this.xdata = new XGridModel(JSON.parse(loadedData));
+			this.resetBrowserView();
 			undo = new XUndoManager(this); // Reset undo history
 			localStorage.removeItem("jsxautosave"); // Remove any autosave
-			_this.showFeedback("Lastet!");
+			this.showFeedback("Lastet!");
 		}
 		else {
 			console.log("Could not find item '"+item+"'!");
@@ -515,7 +743,7 @@ function XController(){
 	this.resetBrowserView = function() {
 		var _this = this;
 		_this.bv = new XGridScreenView(_this.svg,_this.xdata); // bv = browser view
-		_this.setCursor({r:0,c:0,d:"h"});
+		_this.cursor.set({r:0,c:0,d:"h"});
 	};
 	this.showLoadDiscardChanges = function() {
 		var _this = this;

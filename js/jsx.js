@@ -5,12 +5,14 @@ Copyright: Jørn Støylen © 2012
 Version: 0.12
 */
 
-var config = new XConfig();
-var xcon = new XController();
-
+var config = {};
+var xcon = {};
 
 $(document).ready(function() {
 
+	config = new XConfig();
+
+	xcon = new XController();
 	xcon.init();
 
 	// Keyboard event handler

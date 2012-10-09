@@ -54,12 +54,12 @@ Wish list
 	⁃	[RESEARCH] Incremental doc format upgrade method
 	•	Error handling / Unit testing
 	⁃	Especially all model objects! Should fail gracefully if malformed data.
-	•	Clean up v0.1 code
+	•	Clean up code
 	⁃	Consistency in arguments: use hashes if more than one argument and for object constructors
 	•	[RESEARCH] JSON object reconstruction
 	•	[RESEARCH] I18N/L10N
-	•	
-	•	Highlight ranges, look up in dictionaries
+	•	Highlight ranges
+	⁃	Look up selected range in dictionaries
 	•	Find/highlight current word(s)
 	•	Automatic, instant clue square generation
 	•	Clue square editing

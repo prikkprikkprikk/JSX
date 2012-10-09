@@ -21,8 +21,9 @@ function XConfig(arg) {
 	this.fontSizeSolution = arg.fontSizeSolution || 40 * this.ppmm/6;
 	this.fontSizeClue = arg.fontSizeClue || 13 * this.ppmm/6;
 	this.screenFillColor = arg.screenFillColor || "#fff";
-	this.screenCursorFillColor = arg.screenCursorFillColor || "#acf";
-	this.screenCursorLineOpacity = arg.screenCursorLineOpacity || .4;
+	this.screenCursorFillColor = arg.screenCursorFillColor || "#89a";
+	this.screenCursorLineOpacity = arg.screenCursorLineOpacity || .3;
+	this.screenSelectionOpacity = .7;
 	this.screenStrokeColor = arg.screenStrokeColor || "#000";
 	this.strokeWidth = arg.strokeWidth || 0.2; // mm
 	this.alphabet = arg.alphabet || /[a-zæøå]/; // regexp

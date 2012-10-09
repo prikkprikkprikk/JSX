@@ -60,8 +60,8 @@ XGridScreenView.prototype.load = function(data) {
 
 	$("#svgcanvas svg").children().remove();
 
-	var canvasWidth =  ""+(_this.data.width * config.squareSizeInPixels() + 2 * config.strokeWidthInPixels())+"px";
-	var canvasHeight = ""+(_this.data.height * config.squareSizeInPixels() + 2 * config.strokeWidthInPixels())+"px";
+	var canvasWidth =  ""+(_this.data.width * config.squareSizeInPixels())+"px";
+	var canvasHeight = ""+(_this.data.height * config.squareSizeInPixels())+"px";
 	$("#svgcanvas").css({
 		backgroundColor: '#ddd',
 		width: canvasWidth,
@@ -72,12 +72,13 @@ XGridScreenView.prototype.load = function(data) {
 	this._createLayer('background');
 	this._createLayer('grid');
 	this._createLayer('content');
+	this._createLayer('ui');
 
 	var sqsize = config.squareSizeInPixels();
 	this.gridSizeX = data.width*sqsize;
 	this.gridSizeY = data.height*sqsize;
 
-	this.bg = this.svg.rect($('#backgroundLayer'),config.strokeWidthInPixels()/2,config.strokeWidthInPixels()/2,this.gridSizeX,this.gridSizeY,{
+	this.bg = this.svg.rect($('#backgroundLayer'),0,0,this.gridSizeX,this.gridSizeY,{
 		fill: config.screenFillColor,
 		strokeWidth: 0
 	});
@@ -143,21 +144,39 @@ function SquareScreenView(svg, r, c, data) {
 	// TODO: Find a way to get parent's position – replace the four lines above with something like this:
 	// var xpos = parent.xpos + dx;
 	// var ypos = parent.ypos + dy;
-	var classes = "row"+r+" col"+c + " squarebackground";
+	var classes = "row"+r+" col"+c;
 	var id = "row"+r+"col"+c;
 	this.sq = svg.group($("#contentLayer"),{id:id, class:classes});
 	var parentGroup = $("#"+id)[0];
 	var sqfill = config.screenFillColor;
+	this.ui = svg.rect($('#uiLayer'),this.xpos,this.ypos,this.sqsize,this.sqsize,{
+		class: classes + " ui",
+		stroke: "#000",
+		strokeWidth: 0,
+		fill: sqfill,
+		fillOpacity: 0
+	});
 	this.border = svg.rect($('#gridLayer'),this.xpos,this.ypos,this.sqsize,this.sqsize,{
-		class: classes,
+		class: classes + " squarebackground",
 		stroke: config.screenStrokeColor,
 		fill: sqfill,
 		fillOpacity: 0,
 		strokeWidth: config.strokeWidthInPixels()
 	});
-	this.border.onclick = function() {
-		var newPos = {r:r,c:c};
-		xcon.moveCursorTo(newPos);
+	this.ui.onmousedown = function() {
+		xcon.viewDebug.replace("Mousedown on R"+r+" C"+c);
+		var startPos = {r:r,c:c};
+		xcon.cursor.startMouseSelection(startPos);
+	};
+	this.ui.onmouseover = function() {
+		if (xcon.cursor.selecting) {
+			xcon.cursor.updateMouseSelection({r:r,c:c});
+		}
+	};
+	this.ui.onmouseup = function() {
+		xcon.viewDebug.replace("Mouseup on R"+r+" C"+c);
+		var endPos = {r:r,c:c};
+		xcon.cursor.endMouseSelection(endPos);
 	};
 	if (data instanceof LetterSquare) {
 		// TODO: Use config for text appearance

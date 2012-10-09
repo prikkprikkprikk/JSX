@@ -47,6 +47,15 @@ p, h1, h2 {
 	padding: 1em;
 }
 
+#debugWrapper div {
+  margin-bottom: 1em;
+}
+
+#debugWrapper h2 {
+  margin-bottom: .5em;
+  border-bottom: 1px solid #ccc;
+}
+
 #menu {
   float: left;
   width: 11em;
